@@ -35,10 +35,18 @@ Trong mô hình Agent-to-Agent (A2A), khi Agent Điều Phối (Orchestrator) gi
    * Worker đọc vé, xử lý và ghi kết quả vào `outbox/result_{id}.json`.
    * Orchestrator chỉ đọc `outbox` theo chu kỳ, không bị áp lực "phải tự làm ngay".
 
+### ĐIỀU 5: CẤM IM LẶNG (SILENT HALT FORBIDDEN) — BẮT BUỘC NÊU RÕ "HAVE ISSUE"
+1. **Tuyệt đối cấm im lặng:** Đứng im để bảo vệ quota KHÔNG đồng nghĩa với việc "im thin thít" làm người vận hành hoang mang.
+2. Khi Worker không phản hồi hoặc Cầu dao bung (`OPEN`):
+   * Orchestrator **BẮT BUỘC PHẢI HIGHLIGHT RÕ RÀNG**:
+     * `[HAVE ISSUE / SỰ CỐ PHÁT SINH]`: Chỉ rõ Worker nào đang chết, task nào bị nghẽn, thời gian timeout là bao lâu.
+     * `[ROOT CAUSE / NGUYÊN NHÂN]`: Bị rớt mạng, Ollama chưa bật, hay lỗi port.
+     * `[ONE NEXT VALID ACTION]`: Chỉ định duy nhất 1 hành động kế tiếp cho anh Ron / Người vận hành (ví dụ: Bật lại Ollama, kiểm tra log local, hoặc reset cầu dao).
+
 ---
 
 ## 3. Hệ Thống Mã Trạng Thái Cầu Dao (Circuit States)
 
 * `CLOSED` (Bình thường): Dòng điện thông suốt, các Agent giao tiếp ổn định.
 * `HALF_OPEN` (Thử nghiệm hồi phục): Sau sự cố, cho phép thử đúng 1 yêu cầu nhỏ để kiểm tra xem Worker đã sống lại chưa.
-* `OPEN / TRIPPED` (Cắt cầu dao khẩn cấp): Ngắt toàn bộ lệnh gọi, chặn đứng nguy cơ đốt quota. Chờ anh Ron hoặc người vận hành kiểm tra mặt đất.
+* `OPEN / TRIPPED` (Cắt cầu dao khẩn cấp): Ngắt toàn bộ lệnh gọi, chặn đứng nguy cơ đốt quota, đồng thời phát cảnh báo `HAVE ISSUE` tới người vận hành.

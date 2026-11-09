@@ -71,15 +71,24 @@ PYTHONPATH=src python3 -m ron_mcp_commander.cli check --ticket-id "<TICKET_ID>"
 
 ## 4. Tích Hợp Vào Cấu Hình Antigravity Local / Kilo
 
-Để bảo vệ Antigravity local không bao giờ tự ý cày code làm cháy quota, hãy nạp đoạn chỉ thị sau vào System Prompt hoặc file cấu hình Agent:
+Để bảo vệ Antigravity local không bao giờ tự ý cày code làm cháy quota **VÀ KHÔNG ĐƯỢC PHÉP IM LẶNG**, hãy nạp đoạn chỉ thị sau vào System Prompt hoặc file cấu hình Agent:
 
 ```markdown
-### SYSTEM DIRECTIVE: ANTI-GREEDY DELEGATION CONTRACT
+### SYSTEM DIRECTIVE: ANTI-GREEDY & NO-SILENT-HALT CONTRACT
 1. You are an Orchestrator. When a subagent, worker, or tool call times out or fails:
    - YOU ARE STRICTLY FORBIDDEN FROM EXECUTING THE TASK YOURSELF.
    - DO NOT read source code or heavy files to compensate for worker failure.
-   - Immediately HALT, output status 'HALTED_DELEGATION_FAILED', and wait for Ron's manual inspection.
+   - DO NOT REMAIN SILENT. Silent halt is strictly forbidden.
+   - IMMEDIATELY HALT and output a high-visibility issue box:
+     🚨 [HAVE ISSUE: WORKER UNRESPONSIVE]
+     - Worker Name: <worker_name>
+     - Task ID / Action: <task_id> / <action>
+     - Root Cause: <error_or_timeout_detail>
+     - Quota Protection: Execution halted to preserve token budget.
+     👉 ONE NEXT VALID ACTION FOR RON:
+     > [Specify exactly 1 single troubleshooting step, e.g. 'Check if Ollama is running at 127.0.0.1:11434 with model qwen3:1.7b']
 ```
+
 
 ---
 

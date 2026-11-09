@@ -87,6 +87,29 @@ class TestCircuitBreaker(unittest.TestCase):
         self.assertEqual(self.cb.state, CircuitState.CLOSED)
         self.assertIsNone(self.cb.trip_reason)
 
+    def test_generate_issue_alert_and_markdown(self):
+        """Verify HAVE ISSUE alert contains clear root cause and ONE NEXT VALID ACTION."""
+        alert = self.cb.generate_issue_alert(
+            task_id="task-999",
+            target_worker="ollama-local",
+            error_message="Connection timed out after 30s",
+        )
+        self.assertEqual(alert["alert"], "CRITICAL_ISSUE_DETECTED")
+        self.assertIn("HAVE ISSUE", alert["highlight"])
+        self.assertIn("ollama-local", alert["highlight"])
+        self.assertEqual(alert["root_cause"], "Connection timed out after 30s")
+        self.assertIn("one_next_valid_action", alert)
+
+        # Verify markdown formatting has bold highlight and actionable next step
+        md = self.cb.format_issue_alert_markdown(
+            task_id="task-999",
+            target_worker="ollama-local",
+            error_message="Connection timed out after 30s",
+        )
+        self.assertIn("HAVE ISSUE: WORKER UNRESPONSIVE", md)
+        self.assertIn("ONE NEXT VALID ACTION FOR OPERATOR", md)
+
 
 if __name__ == "__main__":
     unittest.main()
+

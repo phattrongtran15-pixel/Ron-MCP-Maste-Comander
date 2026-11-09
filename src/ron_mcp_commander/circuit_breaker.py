@@ -192,3 +192,46 @@ class CircuitBreaker:
             "trip_reason": self.trip_reason,
             "last_state_change_timestamp": self.last_state_change,
         }
+
+    def generate_issue_alert(
+        self,
+        task_id: str,
+        target_worker: str,
+        error_message: str,
+        next_action_suggestion: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generate structured 'HAVE ISSUE' alert report. Silent halt is strictly forbidden."""
+        suggested_action = next_action_suggestion or (
+            f"Check if worker '{target_worker}' is running locally (e.g. check endpoint or 'ollama list'). "
+            "Then run 'ron-guard status' or reset the circuit breaker."
+        )
+        return {
+            "alert": "CRITICAL_ISSUE_DETECTED",
+            "highlight": f"HAVE ISSUE: Worker '{target_worker}' is unresponsive on task '{task_id}'.",
+            "task_id": task_id,
+            "target_worker": target_worker,
+            "root_cause": error_message,
+            "circuit_state": self.state.value,
+            "quota_status": f"{self.total_tokens_consumed}/{self.token_budget_ceiling} tokens used (Budget preserved)",
+            "one_next_valid_action": suggested_action,
+        }
+
+    def format_issue_alert_markdown(
+        self,
+        task_id: str,
+        target_worker: str,
+        error_message: str,
+        next_action_suggestion: Optional[str] = None,
+    ) -> str:
+        """Format the HAVE ISSUE alert in high-visibility markdown for human operators."""
+        alert = self.generate_issue_alert(task_id, target_worker, error_message, next_action_suggestion)
+        return (
+            f"\n🚨 **[HAVE ISSUE: WORKER UNRESPONSIVE / CIRCUIT TRIPPED]**\n"
+            f"- **Issue:** Worker `{alert['target_worker']}` failed or timed out on task `{alert['task_id']}`\n"
+            f"- **Root Cause:** `{alert['root_cause']}`\n"
+            f"- **Circuit State:** `{alert['circuit_state']}` (Execution halted to protect quota)\n"
+            f"- **Quota Preservation:** `{alert['quota_status']}`\n\n"
+            f"👉 **ONE NEXT VALID ACTION FOR OPERATOR:**\n"
+            f"> {alert['one_next_valid_action']}\n"
+        )
+
