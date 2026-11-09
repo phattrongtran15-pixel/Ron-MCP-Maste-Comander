@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "A2ATaskTicket",
+  "description": "Schema for asynchronous task tickets between Orchestrator and Worker Agents",
+  "type": "object",
+  "required": ["ticket_id", "created_at", "issuer", "target_worker", "action", "payload", "timeout_seconds", "max_retries"],
+  "properties": {
+    "ticket_id": {
+      "type": "string",
+      "description": "Unique identifier for this task ticket, e.g. TICKET-20261109-001"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when ticket was dispatched"
+    },
+    "issuer": {
+      "type": "string",
+      "description": "Name of the orchestrator issuing the task, e.g. Antigravity-Orchestrator"
+    },
+    "target_worker": {
+      "type": "string",
+      "description": "Target worker entity, e.g. local-ollama, kilo-worker, coder-subagent"
+    },
+    "action": {
+      "type": "string",
+      "description": "Operation requested, e.g. parse_subtitles, generate_code, lint"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Parameters and input data for the action"
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 300,
+      "default": 30
+    },
+    "max_retries": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2,
+      "default": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PENDING", "PROCESSING", "COMPLETED", "TIMEOUT", "FAILED", "CIRCUIT_TRIPPED"],
+      "default": "PENDING"
+    }
+  },
+  "additionalProperties": false
+}

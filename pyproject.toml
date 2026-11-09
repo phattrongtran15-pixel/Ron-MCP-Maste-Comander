@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ron-mcp-commander"
+version = "0.1.0"
+description = "Quota Guard and Multi-Agent Circuit Breaker for Ron-Sho Systems"
+readme = "README.md"
+authors = [
+    { name = "Ron Sho", email = "ronsho@users.noreply.github.com" }
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+ron-guard = "ron_mcp_commander.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
